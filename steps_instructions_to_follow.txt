@@ -1,3 +1,41 @@
+
+Quick instruction for coming newly after starting gcp VM instance:
+_______________________________________________________________________________________________________________
+copy the external IP from gcp,
+change the .env file GCP_IP_ADDRESS
+
+in terminal:
+screen -ls 
+
+screen -r <any existing screen terminals>
+ctrl+c ---> close it 
+
+after closing all screen terminals do the following:
+screen -S fastapi 
+ in terminal:
+ cd Langraph_FastAPI
+ source /home/sriprasad27thiagu/LLM_agentic_playground/LLM-Optimization-Research/gcp_agentic_system/agents2/bin/activate
+ python main.py 
+
+ctrl+A and press D 
+
+now:
+
+screen -S django 
+ in terminal:
+ cd Langraph_FastAPI/copilot_ui
+ source /home/sriprasad27thiagu/LLM_agentic_playground/LLM-Optimization-Research/gcp_agentic_system/agents2/bin/activate
+ python manage.py runserver 0.0.0.0:8000
+
+ctrl+A and press D 
+
+check:
+screen -ls 
+
+_____________________________________________________________________________________________________
+
+
+
 ## Part 1 — Making it Public on GCP 
 
 make sure the following in settings.py of django project:
@@ -7,7 +45,7 @@ load_dotenv(find_dotenv(), override=True)
 GCP_IP_ADDRESS = os.getenv("GCP_IP_ADDRESS")
 
 
-make:
+make sure for production:
 DEBUG = False 
 in django project settings.py
 
@@ -204,6 +242,7 @@ pip install fastapi uvicorn[standard] \
             langgraph>=0.2.0 openai>=1.0.0 \
             python-dotenv pydantic requests django
 ```
+or use requirements_linux.txt to install <-- recommended
 
 ### Step 3: Fix Settings for Local
 
