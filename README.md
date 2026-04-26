@@ -4,7 +4,7 @@
 View the website here: https://buzz-shortcake-defy.ngrok-free.dev/  (may or may not work)
 
 
-An end-to-end **multi-agent IT incident management copilot** built as a learning project in 5 steps:
+An end-to-end **multi-agent IT incident management copilot** built as a learning project in 5 steps: 
 
 - **Step 1**: LLM client + token/cost logging (Google AI Studio via OpenAI-compatible API)
 - **Step 2**: Deterministic LangChain tools (KnowlegeBase search, log analysis, runbook formatter)
