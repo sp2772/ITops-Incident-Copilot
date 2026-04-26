@@ -1,0 +1,35 @@
+<!-- incidents/templates/incidents/submit.html -->
+{% extends "incidents/base.html" %}
+{% block title_suffix %} — Submit Incident{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-8">
+    <div class="card">
+      <div class="card-header bg-warning text-dark"><strong> Submit New Incident</strong></div>
+      <div class="card-body">
+        <p class="text-muted">The AI will triage, diagnose, and generate a runbook automatically. Allow up to 60 seconds.</p>
+        <form method="post">
+          {% csrf_token %}
+          <div class="mb-3">
+            <label class="form-label fw-bold">Incident Title</label>
+            <input type="text" name="title" class="form-control" placeholder="e.g. Production DB down" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-bold">Description</label>
+            <textarea name="description" class="form-control" rows="6"
+              placeholder="Describe the incident in detail. Include any error messages, affected systems, and user impact." required></textarea>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Your Name (optional)</label>
+            <input type="text" name="submitted_by" class="form-control" placeholder="e.g. john.doe">
+          </div>
+          <button type="submit" class="btn btn-danger w-100 fw-bold">
+             Analyze with AI Copilot
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

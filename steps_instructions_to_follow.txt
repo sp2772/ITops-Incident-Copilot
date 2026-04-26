@@ -1,0 +1,248 @@
+## Part 1 — Making it Public on GCP 
+
+make sure the following in settings.py of django project:
+from dotenv import load_dotenv, find_dotenv
+import os
+load_dotenv(find_dotenv(), override=True)
+GCP_IP_ADDRESS = os.getenv("GCP_IP_ADDRESS")
+
+
+make:
+DEBUG = False 
+in django project settings.py
+
+make sure to have in settings.py (if not, update accordingly):
+
+# FASTAPI_BASE_URL = "http://localhost:8080"   # your FastAPI server
+FASTAPI_BASE_URL = "http://136.116.117.206:8080"
+TEMPLATES[0]['DIRS'] = [BASE_DIR / 'templates']
+CSRF_TRUSTED_ORIGINS = [
+    "https://buzz-shortcake-defy.ngrok-free.dev",
+    "https://*.ngrok-free.dev"
+]
+
+
+### Step 1: Open Firewall Ports on GCP
+
+Go to **GCP Console → VPC Network → Firewall → Create Firewall Rule**:
+
+```
+Name: allow-web-ports
+Targets: All instances in network
+Source IP: 0.0.0.0/0
+Protocols/Ports: TCP → 8000, 8080
+```
+
+Or do it via terminal:
+```bash
+gcloud compute firewall-rules create allow-web-ports \
+  --allow tcp:8000,8080 \
+  --source-ranges 0.0.0.0/0 \
+  --description "Django and FastAPI"
+```
+
+### Step 2: Get Your VM's External IP
+
+```bash
+# In your VM terminal
+curl ifconfig.me
+# or
+gcloud compute instances list   # check EXTERNAL_IP column
+```
+
+Your public URLs will be:
+- FastAPI: `http://<EXTERNAL_IP>:8080`
+- Django: `http://<EXTERNAL_IP>:8000`
+
+### Step 3: Fix Django Settings for Public Access
+
+```python
+# copilot_ui/settings.py
+
+# Replace localhost with your VM's external IP
+ALLOWED_HOSTS = ['<YOUR_EXTERNAL_IP>', 'localhost', '127.0.0.1']
+
+# Update FastAPI URL to use external IP
+FASTAPI_BASE_URL = "http://<YOUR_EXTERNAL_IP>:8080"
+```
+
+Also update CORS in `step5_fastapi.py`:
+```python
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://<YOUR_EXTERNAL_IP>:8000",
+        "http://localhost:8000",
+        "*"   # keep this during dev
+    ],
+    ...
+)
+```
+
+### Step 4: Run Both Servers Permanently with `screen`
+
+`screen` keeps processes alive even when you close the SSH terminal.
+
+```bash
+# Install screen
+sudo apt install screen -y
+
+# --- Start FastAPI ---
+screen -S fastapi          # creates a named session called "fastapi"
+cd ~/your_project_folder
+source agents2/bin/activate
+python main.py             # starts FastAPI on 8080
+# Press Ctrl+A then D to detach (keeps running in background)
+
+# --- Start Django ---
+screen -S django           # creates another session
+cd ~/your_project_folder/copilot_ui
+source ../agents2/bin/activate
+python manage.py runserver 0.0.0.0:8000   # 0.0.0.0 = accept from any IP
+# Press Ctrl+A then D to detach
+```
+
+Useful screen commands:
+```bash
+screen -ls              # list all running sessions
+screen -r fastapi       # reattach to fastapi session
+screen -r django        # reattach to django session
+# Inside a session: Ctrl+A then D = detach, Ctrl+C = stop the process
+```
+
+### Step 5: Make Django & FastAPI Auto-Restart on VM Reboot
+
+GCP VMs can reboot after maintenance. This keeps your servers alive automatically:
+
+```bash
+# Create a startup script
+sudo nano /etc/rc.local
+```
+
+Paste this (replace paths with yours):
+```bash
+#!/bin/bash
+
+# FastAPI
+su - your_username -c "
+  cd /home/your_username/your_project_folder
+  source agents2/bin/activate
+  screen -dmS fastapi python main.py
+"
+
+# Django
+su - your_username -c "
+  cd /home/your_username/your_project_folder/copilot_ui
+  source ../agents2/bin/activate
+  screen -dmS django python manage.py runserver 0.0.0.0:8000
+"
+
+exit 0
+```
+
+```bash
+sudo chmod +x /etc/rc.local
+```
+
+### Step 6: (Optional but recommended) Get a Free Domain with Ngrok
+
+If you want a clean URL like `https://itops-copilot.ngrok.io` instead of a raw IP:
+
+```bash
+# Install ngrok
+curl -s https://ngrok-agent.s3.amazonaws.com/ngrok.asc | sudo tee /etc/apt/trusted.gpg.d/ngrok.asc >/dev/null
+echo "deb https://ngrok-agent.s3.amazonaws.com buster main" | sudo tee /etc/apt/sources.list.d/ngrok.list
+sudo apt update && sudo apt install ngrok
+
+# Sign up free at ngrok.com, then:
+ngrok config add-authtoken <your_token>
+
+# In a screen session, tunnel Django port
+screen -S ngrok
+ngrok http 8000
+# Ctrl+A D to detach — you'll see your public https URL in the output
+```
+
+---
+
+## Part 2 — Running Locally After GCP Ends
+
+### Step 1: Download the Project via Cursor
+
+In Cursor, open the SSH remote connection to your GCP VM, then either:
+- Use Cursor's built-in file explorer → right-click folder → Download
+- Or in your local terminal:
+
+```bash
+# Run this on your LOCAL machine (not the VM)
+scp -r -i ~/.ssh/your_gcp_key your_username@<EXTERNAL_IP>:/home/your_username/your_project_folder ./itops-copilot
+```
+
+Or zip it first on the VM then download:
+```bash
+# On VM
+cd ~
+zip -r itops_project.zip your_project_folder/
+# Then download itops_project.zip via Cursor or scp
+```
+
+### Step 2: Local Setup (Windows/Mac/Linux)
+
+```bash
+# Unzip if needed
+unzip itops_project.zip
+cd your_project_folder
+
+# Create venv locally (same as agents2 on GCP)
+python -m venv agents2
+source agents2/bin/activate          # Mac/Linux
+# agents2\Scripts\activate           # Windows
+
+# Install everything
+pip install fastapi uvicorn[standard] \
+            langchain>=0.3.0 langchain-openai>=0.2.0 langchain-core>=0.3.0 \
+            langgraph>=0.2.0 openai>=1.0.0 \
+            python-dotenv pydantic requests django
+```
+
+### Step 3: Fix Settings for Local
+
+```python
+# copilot_ui/settings.py
+ALLOWED_HOSTS = ['localhost', '127.0.0.1']
+FASTAPI_BASE_URL = "http://localhost:8080"   # back to localhost
+```
+
+```python
+# step5_fastapi.py — CORS back to localhost
+allow_origins=["http://localhost:8000", "http://127.0.0.1:8000"]
+```
+
+### Step 4: Run Locally
+
+```bash
+# Terminal 1 — FastAPI
+cd your_project_folder
+source agents2/bin/activate
+python main.py
+
+# Terminal 2 — Django
+cd your_project_folder/copilot_ui
+source ../agents2/bin/activate
+python manage.py migrate        # only needed first time on new machine
+python manage.py runserver 8000
+```
+
+Open `http://localhost:8000` — works exactly the same as on GCP.
+
+---
+
+## Summary Cheatsheet
+
+| Situation | FastAPI URL | Django URL | Command |
+|-----------|------------|------------|---------|
+| GCP public | `http://<IP>:8080` | `http://<IP>:8000` | `runserver 0.0.0.0:8000` |
+| GCP + ngrok | ngrok gives you https URL | same | `ngrok http 8000` |
+| Local after GCP | `http://localhost:8080` | `http://localhost:8000` | `runserver 8000` |
+
+The **only files that change** between GCP and local are `settings.py` (ALLOWED_HOSTS + FASTAPI_BASE_URL) and the CORS list in `step5_fastapi.py`. Everything else is identical.

@@ -1,0 +1,452 @@
+(agents2) sriprasad27thiagu@agent-observability-host:~/Langraph_FastAPI$ python step4_langgraph_workflow.py 
+=======================================================
+STEP 4 TEST — LangGraph Multi-Agent Workflow
+=======================================================
+
+── Test A: P3 Incident (standard path) ──
+
+[Workflow] Starting incident_id=INC-BDC34B
+  [Graph] triage_node → incident_id=INC-BDC34B
+[trace:TriageAgent] started chain
+[trace:TriageAgent] started chain
+[trace:TriageAgent] started chain
+[trace:TriageAgent] started chain
+[trace:TriageAgent] started chain
+[trace:TriageAgent] finished chain
+[trace:TriageAgent] LLM start (ChatOpenAI)
+[trace:TriageAgent] LLM tool_calls: ['classify_incident_severity', 'search_knowledge_base']
+[trace:TriageAgent] LLM end
+[trace:TriageAgent] finished chain
+[trace:TriageAgent] finished chain
+[trace:TriageAgent] started chain
+[trace:TriageAgent] finished chain
+[trace:TriageAgent] finished chain
+[trace:TriageAgent] started chain
+[trace:TriageAgent] tool start: classify_incident_severity input={'incident_description': 'API gateway returning intermittent 504 timeouts. Latency increased 3x in the last hour. Logs show occasional Timeout errors.'}
+[trace:TriageAgent] tool end: output=content='{"severity": "P2", "category": "application", "sla_minutes": 60, "requires_escalation": false}' name='classify_incident_severity' tool_call_id='function-call-18362748664449036894'
+[trace:TriageAgent] started chain
+[trace:TriageAgent] tool start: search_knowledge_base input={'query': 'API gateway 504 timeouts'}
+[trace:TriageAgent] finished chain
+[trace:TriageAgent] tool end: output=content='{"found": true, "count": 1, "articles": [{"title": "API Timeout / High Latency", "steps": ["Check upstream service health and response times", "Review recent deployments for regressions (git log --oneline -20)", "Check rate-limit and retry-after response headers", "Enable circuit breaker if downstream is flaky"], "prevention": "Implement exponential backoff + jitter in all service clients", "matched_key": "api timeout", "similarity": 1.0}]}' name='search_knowledge_base' tool_call_id='function-call-18362748664449038285'
+[trace:TriageAgent] finished chain
+[trace:TriageAgent] started chain
+[trace:TriageAgent] started chain
+[trace:TriageAgent] started chain
+[trace:TriageAgent] started chain
+[trace:TriageAgent] finished chain
+[trace:TriageAgent] LLM start (ChatOpenAI)
+[trace:TriageAgent] LLM output: SEVERITY: P2
+CATEGORY: application
+SLA: 60 minutes to resolve
+ESCALATE: No
+KNOWN ISSUE: Yes — API Timeout / High Latency
+SUMMARY: The API gateway is experiencing intermittent 504 timeouts and a 3x increase in latency, indicating degraded application performance. A known issue regarding API timeouts and high latency has been identified, with suggested steps including checking upstream services and recent deployments.
+[trace:TriageAgent] LLM end
+[trace:TriageAgent] finished chain
+[trace:TriageAgent] finished chain
+[trace:TriageAgent] started chain
+[trace:TriageAgent] finished chain
+[trace:TriageAgent] finished chain
+[trace:TriageAgent] finished chain
+  [Graph] diagnostic_node → severity=P2
+[trace:DiagnosticAgent] started chain
+[trace:DiagnosticAgent] started chain
+[trace:DiagnosticAgent] started chain
+[trace:DiagnosticAgent] started chain
+[trace:DiagnosticAgent] started chain
+[trace:DiagnosticAgent] finished chain
+[trace:DiagnosticAgent] LLM start (ChatOpenAI)
+[trace:DiagnosticAgent] LLM tool_calls: ['analyze_error_logs']
+[trace:DiagnosticAgent] LLM end
+[trace:DiagnosticAgent] finished chain
+[trace:DiagnosticAgent] finished chain
+[trace:DiagnosticAgent] started chain
+[trace:DiagnosticAgent] finished chain
+[trace:DiagnosticAgent] finished chain
+[trace:DiagnosticAgent] started chain
+[trace:DiagnosticAgent] tool start: analyze_error_logs input={'log_text': 'Timeout errors observed in API gateway logs.'}
+[trace:DiagnosticAgent] tool end: output=content='{"total_lines": 1, "error_count": 1, "identified_issues": [{"pattern": "Timeout", "explanation": "Operation timed out — check latency and downstream load", "line": "Timeout errors observed in API gateway logs.", "similarity": 1.0}], "root_cause_hint": "Operation timed out — check latency and downstream load"}' name='analyze_error_logs' tool_call_id='function-call-15142949113732728629'
+[trace:DiagnosticAgent] finished chain
+[trace:DiagnosticAgent] started chain
+[trace:DiagnosticAgent] started chain
+[trace:DiagnosticAgent] started chain
+[trace:DiagnosticAgent] started chain
+[trace:DiagnosticAgent] finished chain
+[trace:DiagnosticAgent] LLM start (ChatOpenAI)
+[trace:DiagnosticAgent] LLM tool_calls: ['search_knowledge_base']
+[trace:DiagnosticAgent] LLM end
+[trace:DiagnosticAgent] finished chain
+[trace:DiagnosticAgent] finished chain
+[trace:DiagnosticAgent] started chain
+[trace:DiagnosticAgent] finished chain
+[trace:DiagnosticAgent] finished chain
+[trace:DiagnosticAgent] started chain
+[trace:DiagnosticAgent] tool start: search_knowledge_base input={'query': 'API gateway intermittent 504 timeouts due to high latency'}
+[trace:DiagnosticAgent] tool end: output=content='{"found": true, "count": 2, "articles": [{"title": "High CPU / Node Overload", "steps": ["Run: top -c  to identify hot process", "Check runaway queries: SELECT * FROM pg_stat_activity WHERE state=\'active\';", "Scale deployment: kubectl scale deployment <name> --replicas=<n>", "Enable HPA (Horizontal Pod Autoscaler)"], "prevention": "Set CPU resource requests/limits in Kubernetes manifests", "matched_key": "high cpu", "similarity": 1.0}, {"title": "API Timeout / High Latency", "steps": ["Check upstream service health and response times", "Review recent deployments for regressions (git log --oneline -20)", "Check rate-limit and retry-after response headers", "Enable circuit breaker if downstream is flaky"], "prevention": "Implement exponential backoff + jitter in all service clients", "matched_key": "api timeout", "similarity": 1.0}]}' name='search_knowledge_base' tool_call_id='function-call-2057707345684482606'
+[trace:DiagnosticAgent] finished chain
+[trace:DiagnosticAgent] started chain
+[trace:DiagnosticAgent] started chain
+[trace:DiagnosticAgent] started chain
+[trace:DiagnosticAgent] started chain
+[trace:DiagnosticAgent] finished chain
+[trace:DiagnosticAgent] LLM start (ChatOpenAI)
+[trace:DiagnosticAgent] LLM output: ROOT CAUSE: API gateway is experiencing timeouts due to high latency, likely caused by an overloaded upstream service or a recent deployment regression.
+AFFECTED COMPONENTS: API Gateway, Upstream Services
+CONFIDENCE: High
+NEXT DIAGNOSTIC STEP: Check upstream service health and response times. Review recent deployments for potential regressions.
+[trace:DiagnosticAgent] LLM end
+[trace:DiagnosticAgent] finished chain
+[trace:DiagnosticAgent] finished chain
+[trace:DiagnosticAgent] started chain
+[trace:DiagnosticAgent] finished chain
+[trace:DiagnosticAgent] finished chain
+[trace:DiagnosticAgent] finished chain
+  [Graph] resolution_node
+[trace:ResolutionAgent] started chain
+[trace:ResolutionAgent] started chain
+[trace:ResolutionAgent] started chain
+[trace:ResolutionAgent] started chain
+[trace:ResolutionAgent] started chain
+[trace:ResolutionAgent] finished chain
+[trace:ResolutionAgent] LLM start (ChatOpenAI)
+[trace:ResolutionAgent] LLM tool_calls: ['search_knowledge_base']
+[trace:ResolutionAgent] LLM end
+[trace:ResolutionAgent] finished chain
+[trace:ResolutionAgent] finished chain
+[trace:ResolutionAgent] started chain
+[trace:ResolutionAgent] finished chain
+[trace:ResolutionAgent] finished chain
+[trace:ResolutionAgent] started chain
+[trace:ResolutionAgent] tool start: search_knowledge_base input={'query': 'API gateway intermittent 504 timeouts'}
+[trace:ResolutionAgent] tool end: output=content='{"found": true, "count": 1, "articles": [{"title": "API Timeout / High Latency", "steps": ["Check upstream service health and response times", "Review recent deployments for regressions (git log --oneline -20)", "Check rate-limit and retry-after response headers", "Enable circuit breaker if downstream is flaky"], "prevention": "Implement exponential backoff + jitter in all service clients", "matched_key": "api timeout", "similarity": 1.0}]}' name='search_knowledge_base' tool_call_id='function-call-3525024821523223652'
+[trace:ResolutionAgent] finished chain
+[trace:ResolutionAgent] started chain
+[trace:ResolutionAgent] started chain
+[trace:ResolutionAgent] started chain
+[trace:ResolutionAgent] started chain
+[trace:ResolutionAgent] finished chain
+[trace:ResolutionAgent] LLM start (ChatOpenAI)
+[trace:ResolutionAgent] LLM end
+[trace:ResolutionAgent] finished chain
+[trace:ResolutionAgent] finished chain
+[trace:ResolutionAgent] started chain
+[trace:ResolutionAgent] finished chain
+[trace:ResolutionAgent] finished chain
+[trace:ResolutionAgent] finished chain
+[trace:ResolutionAgent-retry] started chain
+[trace:ResolutionAgent-retry] started chain
+[trace:ResolutionAgent-retry] started chain
+[trace:ResolutionAgent-retry] started chain
+[trace:ResolutionAgent-retry] started chain
+[trace:ResolutionAgent-retry] finished chain
+[trace:ResolutionAgent-retry] LLM start (ChatOpenAI)
+[trace:ResolutionAgent-retry] LLM tool_calls: ['format_runbook']
+[trace:ResolutionAgent-retry] LLM end
+[trace:ResolutionAgent-retry] finished chain
+[trace:ResolutionAgent-retry] finished chain
+[trace:ResolutionAgent-retry] started chain
+[trace:ResolutionAgent-retry] finished chain
+[trace:ResolutionAgent-retry] finished chain
+[trace:ResolutionAgent-retry] started chain
+[trace:ResolutionAgent-retry] tool start: format_runbook input={'resolution_steps_json': '{"title": "API Gateway Intermittent 504 Timeouts", "severity": "P2", "category": "application", "steps": ["Verify upstream service health and response times.", "Review recent deployments for potential regressions using `git log --oneline -20`.", "Check API gateway logs for specific upstream service errors or slow responses.", "Examine rate-limit and retry-after response headers for any throttling.", "If an upstream service is identified as the bottleneck, investigate its resource utilization (CPU, memory, network).", "Consider temporarily enabling a circuit breaker for the identified flaky downstream service to prevent cascading failures.", "If a recent deployment is suspected, initiate a rollback to the previous stable version."], "prevention": "Implement expone…
+[trace:ResolutionAgent-retry] tool end: output=content='# Runbook: API Gateway Intermittent 504 Timeouts\n\n**Severity**: P2 | **Category**: application\n\n## Resolution Steps\n\n1. Verify upstream service health and response times.\n2. Review recent deployments for potential regressions using `git log --oneline -20`.\n3. Check API gateway logs for specific upstream service errors or slow responses.\n4. Examine rate-limit and retry-after response headers for any throttling.\n5. If an upstream service is identified as the bottleneck, investigate its resource utilization (CPU, memory, network).\n6. Consider temporarily enabling a circuit breaker for the identified flaky downstream service to prevent cascading failures.\n7. If a recent deployment is suspected, initiate a rollback to the previous stable version.\n\n## Prevention\nImplement exponential backoff and jitter in all service clients to handle transient network issues and improve resilience.\n\n## Notes\nVerification Steps:\n1. Monitor API gateway latency and error rates after applying resolution steps.\n2. Perform sample API calls to ensure successful responses.\n3. Check upstream service health dashboards for sustained normal performance.\n\nRollback Plan:\nIf a rollback of a recent deployment is performed, monitor the system closely. If the rollback does not resolve the issue or introduces new problems, revert the rollback and investigate alternative causes.' name='format_runbook' tool_call_id='function-call-16175597329757303269'
+[trace:ResolutionAgent-retry] finished chain
+[trace:ResolutionAgent-retry] started chain
+[trace:ResolutionAgent-retry] started chain
+[trace:ResolutionAgent-retry] started chain
+[trace:ResolutionAgent-retry] started chain
+[trace:ResolutionAgent-retry] finished chain
+[trace:ResolutionAgent-retry] LLM start (ChatOpenAI)
+[trace:ResolutionAgent-retry] LLM end
+[trace:ResolutionAgent-retry] finished chain
+[trace:ResolutionAgent-retry] finished chain
+[trace:ResolutionAgent-retry] started chain
+[trace:ResolutionAgent-retry] finished chain
+[trace:ResolutionAgent-retry] finished chain
+[trace:ResolutionAgent-retry] finished chain
+  [Graph] qa_node
+[trace:QAAgent] started chain
+[trace:QAAgent] started chain
+[trace:QAAgent] started chain
+[trace:QAAgent] started chain
+[trace:QAAgent] started chain
+[trace:QAAgent] finished chain
+[trace:QAAgent] LLM start (ChatOpenAI)
+[trace:QAAgent] LLM output: VERDICT: APPROVED
+SCORE: 9
+ISSUES:
+* The runbook does not explicitly state the root cause it is addressing, although it is implied by the title.
+* Step 6 suggests enabling a circuit breaker, but does not provide instructions on how to do so.
+* The rollback plan in the notes is a bit vague and could be more specific.
+RECOMMENDATION: Add a section explicitly stating the root cause, provide specific commands for enabling a circuit breaker, and elaborate on the rollback plan for clarity.
+[trace:QAAgent] LLM end
+[trace:QAAgent] finished chain
+[trace:QAAgent] finished chain
+[trace:QAAgent] finished chain
+[trace:QAAgent] finished chain
+
+  Severity  : P2
+  Escalated : False
+
+  Agent outputs:
+
+  [TriageAgent]
+SEVERITY: P2
+CATEGORY: application
+SLA: 60 minutes to resolve
+ESCALATE: No
+KNOWN ISSUE: Yes — API Timeout / High Latency
+SUMMARY: The API gateway is experiencing intermittent 504 timeouts and a 3x increase in latency, indicating degraded application performance. A known issue regarding API timeouts and high latency has been identified, with suggested steps including checking upstream services and recent deployments.
+
+  [DiagnosticAgent]
+ROOT CAUSE: API gateway is experiencing timeouts due to high latency, likely caused by an overloaded upstream service or a recent deployment regression.
+AFFECTED COMPONENTS: API Gateway, Upstream Services
+CONFIDENCE: High
+NEXT DIAGNOSTIC STEP: Check upstream service health and response times. Review recent deployments for potential regressions.
+
+  [ResolutionAgent]
+# Runbook: API Gateway Intermittent 504 Timeouts
+
+**Severity**: P2 | **Category**: application
+
+## Resolution Steps
+
+1. Verify upstream service health and response times.
+2. Review recent deployments for potential regressions using `git log --oneline -20`.
+3. Check API gateway logs for specific upstream service errors or slow responses.
+4. Examine rate-limit and retry-after response headers for any throttling.
+5. If an upstream service is identified as the bottleneck, investigate its resource utilization (CPU, memory, network).
+6. Consider temporarily enabling a circuit breaker for the identified flaky downstream service to prevent cascading failures.
+7. If a recent deployment is suspected, initiate a rollback to the previous stable version.
+
+## Prevention
+Implement exponential backoff and jitter in all service clients to handle transient network issues and improve resilience.
+
+## Notes
+Verification Steps:
+1. Monitor API gateway latency and error rates after applying resolution steps.
+2. Perform sample API calls to ensure successful responses.
+3. Check upstream service health dashboards for sustained normal performance.
+
+Rollback Plan:
+If a rollback of a recent deployment is performed, monitor the system closely. If the rollback does not resolve the issue or introduces new problems, revert the rollback and investigate alternative causes.
+
+  [QAAgent]
+VERDICT: APPROVED
+SCORE: 9
+ISSUES:
+* The runbook does not explicitly state the root cause it is addressing, although it is implied by the title.
+* Step 6 suggests enabling a circuit breaker, but does not provide instructions on how to do so.
+* The rollback plan in the notes is a bit vague and could be more specific.
+RECOMMENDATION: Add a section explicitly stating the root cause, provide specific commands for enabling a circuit breaker, and elaborate on the rollback plan for clarity.
+
+── Test B: P1 Incident (escalation path) ──
+
+[Workflow] Starting incident_id=INC-A1E572
+  [Graph] triage_node → incident_id=INC-A1E572
+[trace:TriageAgent] started chain
+[trace:TriageAgent] started chain
+[trace:TriageAgent] started chain
+[trace:TriageAgent] started chain
+[trace:TriageAgent] started chain
+[trace:TriageAgent] finished chain
+[trace:TriageAgent] LLM start (ChatOpenAI)
+[trace:TriageAgent] LLM tool_calls: ['classify_incident_severity', 'search_knowledge_base']
+[trace:TriageAgent] LLM end
+[trace:TriageAgent] finished chain
+[trace:TriageAgent] finished chain
+[trace:TriageAgent] started chain
+[trace:TriageAgent] finished chain
+[trace:TriageAgent] finished chain
+[trace:TriageAgent] started chain
+[trace:TriageAgent] started chain
+[trace:TriageAgent] tool start: classify_incident_severity input={'incident_description': 'PRODUCTION DOWN. PostgreSQL database completely unavailable. OOMKilled events in logs. All 2000 users cannot access the system.'}
+[trace:TriageAgent] tool start: search_knowledge_base input={'query': 'PostgreSQL OOMKilled production down'}
+[trace:TriageAgent] tool end: output=content='{"severity": "P1", "category": "database", "sla_minutes": 15, "requires_escalation": true}' name='classify_incident_severity' tool_call_id='function-call-6709537541265679308'
+[trace:TriageAgent] tool end: output=content='{"found": true, "count": 1, "articles": [{"title": "DNS Resolution Failure", "steps": ["nslookup <hostname>  inside the affected pod", "Check /etc/resolv.conf", "Restart CoreDNS: kubectl rollout restart -n kube-system deployment/coredns", "Review NetworkPolicy — may be blocking UDP 53"], "prevention": "Monitor CoreDNS error rate in Prometheus", "matched_key": "dns", "similarity": 0.571}]}' name='search_knowledge_base' tool_call_id='function-call-6709537541265680541'
+[trace:TriageAgent] finished chain
+[trace:TriageAgent] finished chain
+[trace:TriageAgent] started chain
+[trace:TriageAgent] started chain
+[trace:TriageAgent] started chain
+[trace:TriageAgent] started chain
+[trace:TriageAgent] finished chain
+[trace:TriageAgent] LLM start (ChatOpenAI)
+[trace:TriageAgent] LLM output: SEVERITY: P1
+CATEGORY: database
+SLA: 15 minutes
+ESCALATE: Yes
+KNOWN ISSUE: No
+SUMMARY: The production PostgreSQL database is completely unavailable due to OOMKilled events, impacting all 2000 users. This is a critical P1 incident requiring immediate attention and escalation.
+[trace:TriageAgent] LLM end
+[trace:TriageAgent] finished chain
+[trace:TriageAgent] finished chain
+[trace:TriageAgent] started chain
+[trace:TriageAgent] finished chain
+[trace:TriageAgent] finished chain
+[trace:TriageAgent] finished chain
+  [Graph] escalate_node → P1 INCIDENT — paging on-call
+  [Graph] diagnostic_node → severity=P1
+[trace:DiagnosticAgent] started chain
+[trace:DiagnosticAgent] started chain
+[trace:DiagnosticAgent] started chain
+[trace:DiagnosticAgent] started chain
+[trace:DiagnosticAgent] started chain
+[trace:DiagnosticAgent] finished chain
+[trace:DiagnosticAgent] LLM start (ChatOpenAI)
+[trace:DiagnosticAgent] LLM tool_calls: ['analyze_error_logs']
+[trace:DiagnosticAgent] LLM end
+[trace:DiagnosticAgent] finished chain
+[trace:DiagnosticAgent] finished chain
+[trace:DiagnosticAgent] started chain
+[trace:DiagnosticAgent] finished chain
+[trace:DiagnosticAgent] finished chain
+[trace:DiagnosticAgent] started chain
+[trace:DiagnosticAgent] tool start: analyze_error_logs input={'log_text': 'OOMKilled events in logs'}
+[trace:DiagnosticAgent] tool end: output=content='{"total_lines": 1, "error_count": 0, "identified_issues": [{"pattern": "OOMKilled", "explanation": "Out of memory — pod killed by kernel; increase memory limit", "line": "OOMKilled events in logs", "similarity": 1.0}], "root_cause_hint": "Out of memory — pod killed by kernel; increase memory limit"}' name='analyze_error_logs' tool_call_id='function-call-18239030001111214527'
+[trace:DiagnosticAgent] finished chain
+[trace:DiagnosticAgent] started chain
+[trace:DiagnosticAgent] started chain
+[trace:DiagnosticAgent] started chain
+[trace:DiagnosticAgent] started chain
+[trace:DiagnosticAgent] finished chain
+[trace:DiagnosticAgent] LLM start (ChatOpenAI)
+[trace:DiagnosticAgent] LLM tool_calls: ['search_knowledge_base']
+[trace:DiagnosticAgent] LLM end
+[trace:DiagnosticAgent] finished chain
+[trace:DiagnosticAgent] finished chain
+[trace:DiagnosticAgent] started chain
+[trace:DiagnosticAgent] finished chain
+[trace:DiagnosticAgent] finished chain
+[trace:DiagnosticAgent] started chain
+[trace:DiagnosticAgent] tool start: search_knowledge_base input={'query': 'PostgreSQL OOMKilled'}
+[trace:DiagnosticAgent] tool end: output=content='{"found": false, "count": 0, "articles": []}' name='search_knowledge_base' tool_call_id='function-call-10871754521338031322'
+[trace:DiagnosticAgent] finished chain
+[trace:DiagnosticAgent] started chain
+[trace:DiagnosticAgent] started chain
+[trace:DiagnosticAgent] started chain
+[trace:DiagnosticAgent] started chain
+[trace:DiagnosticAgent] finished chain
+[trace:DiagnosticAgent] LLM start (ChatOpenAI)
+[trace:DiagnosticAgent] LLM output: ROOT CAUSE: PostgreSQL pod was OOMKilled due to insufficient memory.
+AFFECTED COMPONENTS: PostgreSQL, User Access
+CONFIDENCE: High
+NEXT DIAGNOSTIC STEP: Increase memory limits for the PostgreSQL pod and investigate memory usage patterns.
+[trace:DiagnosticAgent] LLM end
+[trace:DiagnosticAgent] finished chain
+[trace:DiagnosticAgent] finished chain
+[trace:DiagnosticAgent] started chain
+[trace:DiagnosticAgent] finished chain
+[trace:DiagnosticAgent] finished chain
+[trace:DiagnosticAgent] finished chain
+  [Graph] resolution_node
+[trace:ResolutionAgent] started chain
+[trace:ResolutionAgent] started chain
+[trace:ResolutionAgent] started chain
+[trace:ResolutionAgent] started chain
+[trace:ResolutionAgent] started chain
+[trace:ResolutionAgent] finished chain
+[trace:ResolutionAgent] LLM start (ChatOpenAI)
+[trace:ResolutionAgent] LLM tool_calls: ['search_knowledge_base']
+[trace:ResolutionAgent] LLM end
+[trace:ResolutionAgent] finished chain
+[trace:ResolutionAgent] finished chain
+[trace:ResolutionAgent] started chain
+[trace:ResolutionAgent] finished chain
+[trace:ResolutionAgent] finished chain
+[trace:ResolutionAgent] started chain
+[trace:ResolutionAgent] tool start: search_knowledge_base input={'query': 'PostgreSQL OOMKilled insufficient memory'}
+[trace:ResolutionAgent] tool end: output=content='{"found": false, "count": 0, "articles": []}' name='search_knowledge_base' tool_call_id='function-call-17912032526885876341'
+[trace:ResolutionAgent] finished chain
+[trace:ResolutionAgent] started chain
+[trace:ResolutionAgent] started chain
+[trace:ResolutionAgent] started chain
+[trace:ResolutionAgent] started chain
+[trace:ResolutionAgent] finished chain
+[trace:ResolutionAgent] LLM start (ChatOpenAI)
+[trace:ResolutionAgent] LLM tool_calls: ['format_runbook']
+[trace:ResolutionAgent] LLM end
+[trace:ResolutionAgent] finished chain
+[trace:ResolutionAgent] finished chain
+[trace:ResolutionAgent] started chain
+[trace:ResolutionAgent] finished chain
+[trace:ResolutionAgent] finished chain
+[trace:ResolutionAgent] started chain
+[trace:ResolutionAgent] tool start: format_runbook input={'resolution_steps_json': '{"title": "Production PostgreSQL Database Unavailable due to OOMKilled Event", "severity": "P1", "category": "database", "steps": ["1. Access the Kubernetes cluster and identify the PostgreSQL pod that was OOMKilled.", "2. Increase the memory limit for the PostgreSQL pod. Consult current memory usage and set a new limit that is at least 20% higher than the peak usage observed.", "3. Apply the updated memory limit configuration to the PostgreSQL deployment.", "4. Monitor the PostgreSQL pod to ensure it restarts successfully and remains stable.", "5. Verify that users can access the system and that the PostgreSQL database is responsive.", "6. Investigate the root cause of the increased memory consumption. This may involve analyzing PostgreSQL logs, query performanc…
+[trace:ResolutionAgent] tool end: output=content='## Resolution Runbook\n\n{"title": "Production PostgreSQL Database Unavailable due to OOMKilled Event", "severity": "P1", "category": "database", "steps": ["1. Access the Kubernetes cluster and identify the PostgreSQL pod that was OOMKilled.", "2. Increase the memory limit for the PostgreSQL pod. Consult current memory usage and set a new limit that is at least 20% higher than the peak usage observed.", "3. Apply the updated memory limit configuration to the PostgreSQL deployment.", "4. Monitor the PostgreSQL pod to ensure it restarts successfully and remains stable.", "5. Verify that users can access the system and that the PostgreSQL database is responsive.", "6. Investigate the root cause of the increased memory consumption. This may involve analyzing PostgreSQL logs, query performance, and application behavior.", "7. If a specific query or process is identified as the memory leak, optimize or terminate it.", "8. Consider implementing more granular monitoring and alerting for PostgreSQL memory usage to proactively detect potential issues."], "prevention": "Regularly review and adjust memory allocations for the PostgreSQL database based on performance monitoring and historical usage data. Implement proactive monitoring and alerting for memory usage spikes. Optimize slow or resource-intensive queries.", "notes": "Verification Steps:\n1. Check PostgreSQL pod status: `kubectl get pods -n <namespace> | grep postgresql`\n2. Verify database connectivity: `psql -h <hostname> -U <user> -d <database>`\n3. Confirm user access: Ask a sample of users to log in and perform core functions.\n\nRollback Plan:\nIf increasing memory limits causes further instability or performance degradation, revert the memory limit changes to the previous stable values. If the issue persists after memory adjustments, consider rolling back to a previous known-good deployment of the PostgreSQL instance."}' name='format_runbook' tool_call_id='function-call-12776609345506092503'
+[trace:ResolutionAgent] finished chain
+[trace:ResolutionAgent] started chain
+[trace:ResolutionAgent] started chain
+[trace:ResolutionAgent] started chain
+[trace:ResolutionAgent] started chain
+[trace:ResolutionAgent] finished chain
+[trace:ResolutionAgent] LLM start (ChatOpenAI)
+[trace:ResolutionAgent] LLM end
+[trace:ResolutionAgent] finished chain
+[trace:ResolutionAgent] finished chain
+[trace:ResolutionAgent] started chain
+[trace:ResolutionAgent] finished chain
+[trace:ResolutionAgent] finished chain
+[trace:ResolutionAgent] finished chain
+  [Graph] qa_node
+[trace:QAAgent] started chain
+[trace:QAAgent] started chain
+[trace:QAAgent] started chain
+[trace:QAAgent] started chain
+[trace:QAAgent] started chain
+[trace:QAAgent] finished chain
+[trace:QAAgent] LLM start (ChatOpenAI)
+[trace:QAAgent] LLM output: VERDICT: APPROVED
+SCORE: 9
+ISSUES:
+* The runbook does not explicitly state that backups should be taken before making changes, although the rollback plan implies a way to revert.
+RECOMMENDATION: Add a step to ensure backups are taken before modifying memory limits.
+[trace:QAAgent] LLM end
+[trace:QAAgent] finished chain
+[trace:QAAgent] finished chain
+[trace:QAAgent] finished chain
+[trace:QAAgent] finished chain
+
+  Severity  : P1
+  Escalated : True
+
+  Agent outputs:
+
+  [TriageAgent]
+!! ESCALATION TRIGGERED — P1 INCIDENT !!
+On-call engineer paged via PagerDuty.
+War room created: #incident-response
+
+SEVERITY: P1
+CATEGORY: database
+SLA: 15 minutes
+ESCALATE: Yes
+KNOWN ISSUE: No
+SUMMARY: The production PostgreSQL database is completely unavailable due to OOMKilled events, impacting all 2000 users. This is a critical P1 incident requiring immediate attention and escalation.
+
+  [DiagnosticAgent]
+ROOT CAUSE: PostgreSQL pod was OOMKilled due to insufficient memory.
+AFFECTED COMPONENTS: PostgreSQL, User Access
+CONFIDENCE: High
+NEXT DIAGNOSTIC STEP: Increase memory limits for the PostgreSQL pod and investigate memory usage patterns.
+
+  [ResolutionAgent]
+## Resolution Runbook
+
+{"title": "Production PostgreSQL Database Unavailable due to OOMKilled Event", "severity": "P1", "category": "database", "steps": ["1. Access the Kubernetes cluster and identify the PostgreSQL pod that was OOMKilled.", "2. Increase the memory limit for the PostgreSQL pod. Consult current memory usage and set a new limit that is at least 20% higher than the peak usage observed.", "3. Apply the updated memory limit configuration to the PostgreSQL deployment.", "4. Monitor the PostgreSQL pod to ensure it restarts successfully and remains stable.", "5. Verify that users can access the system and that the PostgreSQL database is responsive.", "6. Investigate the root cause of the increased memory consumption. This may involve analyzing PostgreSQL logs, query performance, and application behavior.", "7. If a specific query or process is identified as the memory leak, optimize or terminate it.", "8. Consider implementing more granular monitoring and alerting for PostgreSQL memory usage to proactively detect potential issues."], "prevention": "Regularly review and adjust memory allocations for the PostgreSQL database based on performance monitoring and historical usage data. Implement proactive monitoring and alerting for memory usage spikes. Optimize slow or resource-intensive queries.", "notes": "Verification Steps:
+1. Check PostgreSQL pod status: `kubectl get pods -n <namespace> | grep postgresql`
+2. Verify database connectivity: `psql -h <hostname> -U <user> -d <database>`
+3. Confirm user access: Ask a sample of users to log in and perform core functions.
+
+Rollback Plan:
+If increasing memory limits causes further instability or performance degradation, revert the memory limit changes to the previous stable values. If the issue persists after memory adjustments, consider rolling back to a previous known-good deployment of the PostgreSQL instance."}
+
+  [QAAgent]
+VERDICT: APPROVED
+SCORE: 9
+ISSUES:
+* The runbook does not explicitly state that backups should be taken before making changes, although the rollback plan implies a way to revert.
+RECOMMENDATION: Add a step to ensure backups are taken before modifying memory limits.
+
+✅ STEP 4 COMPLETE — LangGraph workflow running both paths
+(agents2) sriprasad27thiagu@agent-observability-host:~/Langraph_FastAPI$ 

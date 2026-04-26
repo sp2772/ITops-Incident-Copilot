@@ -1,0 +1,64 @@
+<!-- incidents/templates/incidents/dashboard.html -->
+{% extends "incidents/base.html" %}
+{% block title_suffix %} — Dashboard{% endblock %}
+
+{% block content %}
+<h2 class="mb-4">Incident Dashboard</h2>
+
+<!-- Summary cards -->
+<div class="row g-3 mb-4">
+  <div class="col-md-3">
+    <div class="card text-white bg-danger">
+      <div class="card-body"><h5>P1 Critical</h5><h2>{{ counts.P1 }}</h2></div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card text-dark bg-warning">
+      <div class="card-body"><h5>P2 Major</h5><h2>{{ counts.P2 }}</h2></div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card text-white bg-primary">
+      <div class="card-body"><h5>Total Incidents</h5><h2>{{ counts.total }}</h2></div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card text-white bg-dark">
+      <div class="card-body"><h5>Escalated</h5><h2>{{ counts.escalated }}</h2></div>
+    </div>
+  </div>
+</div>
+
+<!-- Incidents table -->
+<div class="card">
+  <div class="card-header d-flex justify-content-between align-items-center">
+    <strong>All Incidents</strong>
+    <a href="/submit/" class="btn btn-sm btn-warning">+ Submit New</a>
+  </div>
+  <div class="card-body p-0">
+    <table class="table table-hover mb-0">
+      <thead class="table-dark">
+        <tr>
+          <th>ID</th><th>Severity</th><th>Category</th>
+          <th>Status</th><th>Escalated</th><th>Created</th><th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for inc in incidents %}
+        <tr>
+          <td><code>{{ inc.incident_id }}</code></td>
+          <td><span class="badge severity-{{ inc.severity }}">{{ inc.severity }}</span></td>
+          <td>{{ inc.category }}</td>
+          <td>{{ inc.status }}</td>
+          <td>{% if inc.is_escalated %}>> Yes{% else %}No{% endif %}</td>
+          <td>{{ inc.created_at|date:"M d, H:i" }}</td>
+          <td><a href="/incident/{{ inc.incident_id }}/" class="btn btn-sm btn-outline-primary">View</a></td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="7" class="text-center text-muted py-4">No incidents yet. Submit one above.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

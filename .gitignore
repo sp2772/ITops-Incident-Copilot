@@ -1,0 +1,43 @@
+# Environment variables — NEVER commit this
+.env
+*.env
+.env.*
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.pyc
+
+# Virtual environment
+agents2/
+venv/
+env/
+.venv/
+
+# Django
+copilot_ui/db.sqlite3
+copilot_ui/__pycache__/
+*.sqlite3
+
+# Cost log (has session data, regenerates itself)
+cost_log.json
+
+# GCP credentials if any
+*.json
+service-account*.json
+gcp-key*.json
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Cursor / IDE
+.cursor/
+.vscode/
+.idea/
+
+# Logs
+*.log

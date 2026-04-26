@@ -1,0 +1,58 @@
+<!-- incidents/templates/incidents/detail.html -->
+{% extends "incidents/base.html" %}
+{% block title_suffix %} — {{ incident.incident_id }}{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h2><span class="badge severity-{{ incident.severity }}">{{ incident.severity }}</span>
+      {{ incident.incident_id }}</h2>
+  <a href="/" class="btn btn-outline-secondary">← Dashboard</a>
+</div>
+
+{% if incident.is_escalated %}
+<div class="alert alert-danger"> <strong>ESCALATED</strong> — On-call engineer has been paged.</div>
+{% endif %}
+
+<!-- Original user submission -->
+<div class="card mb-3">
+  <div class="card-header bg-light"><strong>Incident Submitted</strong></div>
+  <div class="card-body">
+    <div class="mb-2"><strong>Title:</strong> {{ incident.title }}</div>
+    <div class="mb-0"><strong>Description:</strong></div>
+    <pre class="mb-0" style="white-space:pre-wrap">{{ incident.description }}</pre>
+  </div>
+</div>
+
+<div class="row g-3">
+  <!-- Triage -->
+  <div class="col-md-6">
+    <div class="card h-100">
+      <div class="card-header bg-info text-dark"><strong> Triage Result</strong></div>
+      <div class="card-body"><pre class="mb-0" style="white-space:pre-wrap">{{ incident.triage }}</pre></div>
+    </div>
+  </div>
+  <!-- Diagnosis -->
+  <div class="col-md-6">
+    <div class="card h-100">
+      <div class="card-header bg-secondary text-white"><strong> Root Cause Analysis</strong></div>
+      <div class="card-body"><pre class="mb-0" style="white-space:pre-wrap">{{ incident.diagnosis }}</pre></div>
+    </div>
+  </div>
+  <!-- Runbook -->
+  <div class="col-12">
+    <div class="card">
+      <div class="card-header bg-primary text-white"><strong> Resolution Runbook</strong></div>
+      <div class="card-body">
+        <div class="runbook-box">{{ incident.runbook }}</div>
+      </div>
+    </div>
+  </div>
+  <!-- QA -->
+  <div class="col-12">
+    <div class="card">
+      <div class="card-header bg-success text-white"><strong> QA Review</strong></div>
+      <div class="card-body"><pre class="mb-0" style="white-space:pre-wrap">{{ incident.qa_verdict }}</pre></div>
+    </div>
+  </div>
+</div>
+{% endblock %}
